@@ -8,7 +8,7 @@ def generateProduct(size):
         f.write(str(max_weight) + "\n")
         f.write("name, " + "weight, " + "value" + "\n")
 
-    for i in range(size):
+    for _ in range(size):
         weight = random.randint(1,25)
         value = random.randint(5,30)
         element1 = random.randint(65,90)
@@ -28,48 +28,6 @@ if os.path.exists(file_path):
 else:
     generateProduct(20)   
 
-''' 
-    since I have 20 elements I hava to make  the size of the chromosome to  20
-    so lets make the size of the size 20 and if selelected we make 1 and if not we make it 0
-    what types of function to  write 
-
-    1. Fitness Function
-
-    2. Chromosome Initialization
-
-    3. Initialize the population
-
-    4. Fitness Evaluation
-
-    5. Roulette Selection
-
-    6. Crossover
-
-    7. Mutation
-
-'''
-
-
-'''
--> Here we have the chromosome size equale to 20 as we have 20 items
-    population size — number of individuals in the population
-    parent count — number of parents that are selected from the population 
-    on the base of the roulette selection. The parent count must be less than the population size.
-
-
-    probability of ones in a new chromosome — probability which is used for initial population generation.
-    It is the probability of one in the initial chromosome. High values may lead to the generation 
-    of many individuals with fitness equal to zero. This parameter is specific to our method of 
-    generation of the initial chromosome. This parameter is meaningless if your choice is any other method.
-
-
-
-    probability of crossover — the probability of crossover i.e., if the child inherits the gene of both parents or 1.
-    probability of mutation — the probability of mutation. I recommend starting at the value of 1/chromosome size 
-    and increasing later as you see the change
-'''
-
-# lets write algorithm to generate chromome
 def chromosome_generator(size, weights, weight_limit, probability):
     total_weight = inf
     while total_weight>weight_limit:
@@ -120,8 +78,7 @@ def fitness_evaluate(population, weights, values, weight_limit):
     return value_fit, weight_fit
 def selection(population, fitness_score, num_children):
     total_fit = sum(fitness_score)
-    relative_fits = [fitness_score[i]/total_fit for i in range(len(fitness_score))]
-    # print(len(relative_fits))
+    relative_fits = [fitness_score[i]/(total_fit+0.1) for i in range(len(fitness_score))]
     cum_prob = [fitness_score[0]]
     for i in range(1, len(relative_fits)):
         cur = cum_prob[i-1] + relative_fits[i]
@@ -163,6 +120,8 @@ values = []
 items = []
 with open("data.txt","r") as text_file:
     line_reader=text_file.readlines()
+    max_weight = int(line_reader[0])
+    # print(max_weight)
     for line in line_reader:
         line_list=line.strip().split(",")
         try:
@@ -174,63 +133,70 @@ with open("data.txt","r") as text_file:
             items.append((line_list[0],weight,value))
         except:
             continue
-max_weight = 73 #random.randint(60, 100)
 
-print(max_weight)
-
-population_size = 8
-chromosome_size = 20
-create_pobability = 0.1
-crossover_probability = 0.5
-mutation_probability = 0.05
-weight_fit = [0.000005]
-accuracy = 0
-parent = []
-ans = []
 
 def fitness_zero_checker(chromosome, weight, weight_limit):
     tot_weigh = 0
     for i in range(len(chromosome)):
         tot_weigh+=chromosome[i]*weight[i]
     return tot_weigh<=weight_limit
+def final_run(item_size):
+    population_size = 6
+    chromosome_size = item_size
+    create_pobability = 0.5
+    crossover_probability = 0.5
+    mutation_probability = 0.05
+    accuracy = 0
+    parent = []
+    ans = [0, 0, []]
+    epochs = 0
+    best_chromosome = [0]*chromosome_size
+    best_value = 0
+    best_weight = 0
+    top_va = 0
+    while abs(accuracy-100)>20 or epochs<50:
+        epochs+=1
+        cur_generation = create_full_chromosome_ppln(population_size, max_weight, chromosome_size, weights, create_pobability, parent)
+        value_fit, weight_fit = fitness_evaluate(cur_generation, weights, values, max_weight)
 
+        selected = selection(cur_generation, value_fit, 2)
+        crossover_one = []
+        chromosome1, chromosome2  = selected
+        chr1, chr2  = crossover(chromosome1, chromosome2, crossover_probability)
+        crossover_one.extend([chr1, chr2])
 
-while abs(accuracy-90)>10:
-    cur_generation = create_full_chromosome_ppln(population_size, max_weight, chromosome_size, weights, create_pobability, parent)
-    value_fit, weight_fit = fitness_evaluate(cur_generation, weights, values, max_weight)
-
-    selected = selection(cur_generation, value_fit, 2)
-    crossover_one = []
-    chromosome1, chromosome2  = selected
-    chr1, chr2  = crossover(chromosome1, chromosome2, crossover_probability)
-    crossover_one.extend([chr1, chr2])
-
-    mutated_one = []
-    for chromosome in crossover_one:
-        mut = mutation(chromosome, mutation_probability)
-        while not fitness_zero_checker(mut, weights, max_weight):
-            mut = mutation(mut, mutation_probability)
-        mutated_one.append(mut)
+        mutated_one = []
+        for chromosome in crossover_one:
+            mut = mutation(chromosome, mutation_probability)
+            while not fitness_zero_checker(mut, weights, max_weight):
+                mut = mutation(mut, mutation_probability)
+            mutated_one.append(mut)
+                
+        for chromosome in mutated_one:
             
-    for chromosome in mutated_one:
-        
-        my_weight = 0
-        my_value = 0
-        for i in range(len(chromosome)):
-            my_weight+=chromosome[i]*weights[i]
-            my_value+=chromosome[i]*values[i]
-        if accuracy<(my_weight/max_weight)*100:
-            accuracy = (my_weight/max_weight)*100
-            ans = [my_weight, my_value, chromosome]
-
-print("accuracy =>",accuracy)
-print("weight=>", ans[0])
-print("value=>", ans[1])
-
-chromosome = ans[2]
-for i in range(len(chromosome)):
-    if chromosome[i]:
-        print(items[i][0])
+            my_weight = 0
+            my_value = 0
+            for i in range(len(chromosome)):
+                my_weight+=chromosome[i]*weights[i]
+                my_value+=chromosome[i]*values[i]
+            top_va = max(top_va, my_value)
+            cur_accurancy = (my_weight/max_weight)*100
+            if my_value > ans[1]:
+                accuracy = cur_accurancy
+                ans = [my_weight, my_value, chromosome]
+            if ans[1]>best_value:
+                best_chromosome = ans[2]
+                best_value = ans[1]
+                best_weight = ans[0]
+    ans = [best_weight, best_value, best_chromosome]
+    chromosome = ans[2]
+    return ans
+best_weight1, best_value1, chr1 =  final_run(10)
+best_weight2, best_value2, chr2 =  final_run(15)
+best_weight3, best_value3, chr3 =  final_run(20)
+print(max_weight)
+print(best_weight1, best_weight2, best_weight3)
+print(best_value1, best_value2, best_value3)
 
 
 

@@ -75,6 +75,7 @@ class HillClimbingAlgorithm:
 items=[]
 with open("data.txt","r") as text_file:
     line_reader=text_file.readlines()
+    max_weight = int(line_reader[0])
     for line in line_reader:
         line_list=line.strip().split(",")
         try:
@@ -84,6 +85,6 @@ with open("data.txt","r") as text_file:
             items.append((line_list[0],weight,value))
         except:
             continue
-max_weight = 73
+# max_weight = 50
 instance=HillClimbingAlgorithm(max_weight,items)
 instance.candidate_evaluator()
