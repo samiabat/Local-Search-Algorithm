@@ -1,10 +1,10 @@
-from cmath import inf
+import matplotlib.pyplot as plt
 import random
 import os
-file_path = 'data.txt'
+file_path = 'my-file.txt'
 max_weight = random.randint(30,100)
 def generateProduct(size):
-    with open('data.txt', 'a') as f:
+    with open('my-file.txt', 'a') as f:
         f.write(str(max_weight) + "\n")
         f.write("name, " + "weight, " + "value" + "\n")
 
@@ -19,7 +19,7 @@ def generateProduct(size):
         element6 = random.randint(97,122)
         arr = [chr(element1), chr(element2), chr(element3), chr(element4), chr(element5), chr(element6)]
         name = "".join(arr)
-        with open('data.txt', 'a') as f:
+        with open('my-file.txt', 'a') as f:
             f.write(name + "," + str(weight) + "," + str(value) + "\n" )
 
 if os.path.exists(file_path):
@@ -29,16 +29,13 @@ else:
     generateProduct(20)   
 
 def chromosome_generator(size, weights, weight_limit, probability):
-    total_weight = inf
+    total_weight = float("inf")
     while total_weight>weight_limit:
         chromosome = [0 for _ in range(size)]
         for i in range(len(chromosome)):
             prob = random.uniform(0,1)
             if prob<probability:
                 chromosome[i] = 1
-        '''
-            Now it is the time to check the generated chromosome is zero fitness free
-        '''
         total_weight = 0
         for i in range(len(chromosome)):
             total_weight+=chromosome[i]*weights[i]
@@ -54,7 +51,6 @@ def create_full_chromosome_ppln(population_size, weight_limit, chromosome_size, 
     return cur_generation
 
 
-# lets write fitness function first
 def fitness_function(weights, values, weight_limit, chromosome):
     cur_weight = 0
     cur_cost = 0
@@ -118,10 +114,9 @@ def mutation(chromosome, probability_mutation):
 weights = []
 values = []
 items = []
-with open("data.txt","r") as text_file:
+with open("my-file.txt","r") as text_file:
     line_reader=text_file.readlines()
     max_weight = int(line_reader[0])
-    # print(max_weight)
     for line in line_reader:
         line_list=line.strip().split(",")
         try:
@@ -140,7 +135,7 @@ def fitness_zero_checker(chromosome, weight, weight_limit):
     for i in range(len(chromosome)):
         tot_weigh+=chromosome[i]*weight[i]
     return tot_weigh<=weight_limit
-def final_run(item_size):
+def genetic_algoritm(item_size):
     population_size = 6
     chromosome_size = item_size
     create_pobability = 0.5
@@ -191,14 +186,30 @@ def final_run(item_size):
     ans = [best_weight, best_value, best_chromosome]
     chromosome = ans[2]
     return ans
-best_weight1, best_value1, chr1 =  final_run(10)
-best_weight2, best_value2, chr2 =  final_run(15)
-best_weight3, best_value3, chr3 =  final_run(20)
-print(max_weight)
-print(best_weight1, best_weight2, best_weight3)
-print(best_value1, best_value2, best_value3)
+best_weight1, best_value1, chr1 =  genetic_algoritm(10)
+best_weight2, best_value2, chr2 =  genetic_algoritm(15)
+best_weight3, best_value3, chr3 =  genetic_algoritm(20)
+num_selected1 = chr1.count(1)
+num_selected2 = chr2.count(1)
+num_selected3 = chr3.count(1)
 
 
+
+  
+left = [best_value1, best_value2, best_value3]
+  
+height = [10, 15, 20]
+  
+tick_label = ['10 data & weight '+ str(best_weight1), '15 data & weight '+str(best_weight2), '20 data & weight '+str(best_weight3)]
+  
+plt.bar(height, left,  tick_label = tick_label,
+        width = 0.8, color = ['red', 'green', 'yellow'])
+  
+plt.xlabel(('red = ' + str(num_selected1)+ ' item selected, ' + 'green = '+ str(num_selected2)+ ' item selected, '+ 'yellow = '+ str(num_selected3) + ' item selected'))
+plt.ylabel('Max_value we get')
+plt.title('The knapsack problem with genetic algorithm with weight limit '+str(max_weight))
+  
+plt.show()
 
 
 

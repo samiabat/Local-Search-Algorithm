@@ -1,9 +1,9 @@
 import random
 import os
-file_path = 'data.txt'
+file_path = 'my-file.txt'
 max_weight = random.randint(30,100)
 def generateProduct(size):
-    with open('data.txt', 'a') as f:
+    with open('my-file.txt', 'a') as f:
         f.write(str(max_weight) + "\n")
         f.write("name, " + "weight, " + "value" + "\n")
 
@@ -18,7 +18,7 @@ def generateProduct(size):
         element6 = random.randint(97,122)
         arr = [chr(element1), chr(element2), chr(element3), chr(element4), chr(element5), chr(element6)]
         name = "".join(arr)
-        with open('data.txt', 'a') as f:
+        with open('my-file.txt', 'a') as f:
             f.write(name + "," + str(weight) + "," + str(value) + "\n" )
 
 if os.path.exists(file_path):
@@ -73,7 +73,7 @@ class HillClimbingAlgorithm:
         print("weight=>", tot_weight)
         
 items=[]
-with open("data.txt","r") as text_file:
+with open("my-file.txt","r") as text_file:
     line_reader=text_file.readlines()
     max_weight = int(line_reader[0])
     for line in line_reader:
